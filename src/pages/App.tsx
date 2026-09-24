@@ -1,23 +1,21 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Input } from "./../components/Input";
+
+import SaveData from "./../utils/SaveData.tsx";
 
 const standardSettings = {
   bgV1: "bg-sky-950",
   bgV2: "bg-sky-900",
   bgV3: "bg-sky-800",
-
   hover: "hover:bg-sky-700",
-
   textColor: "text-white",
-
   fontType: "font-sans",
-
   p: "p-2.5",
-
   gap: "gap-2.5",
-
   inputStyle: "bg-sky-900 rounded border outline-none text-center italic p-1",
   selectStyle: "bg-sky-900 rounded border outline-none text-center italic p-1",
-
   focus: "focus:bg-sky-700",
 };
 
@@ -38,7 +36,44 @@ const technologies = [
   "TypeScript",
 ];
 
-export function App() {
+export default function App() {
+  const seNavigate = useNavigate();
+
+  const [nome, setNome] = useState("");
+  const [sobrenome, setSobrenome] = useState("");
+  const [email, setEmail] = useState("");
+  const [area, setArea] = useState("");
+  const [senioridade, setSenioridade] = useState("junior");
+  const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>(
+    [],
+  );
+  const [experiencia, setExperiencia] = useState("");
+
+  const handleTechnologyChange = (technology: string) => {
+    setSelectedTechnologies((prev) =>
+      prev.includes(technology)
+        ? prev.filter((item) => item !== technology)
+        : [...prev, technology],
+    );
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const inf = {
+      Nome: nome,
+      Sobrenome: sobrenome,
+      Email: email,
+      Area: area,
+      Senioridade: senioridade,
+      Tecnologias: selectedTechnologies,
+      Experiencia: experiencia,
+    };
+
+    SaveData(inf);
+    seNavigate("/Display");
+  };
+
   return (
     <main
       className={`min-h-screen flex flex-col ${standardSettings.bgV1} ${standardSettings.textColor} ${standardSettings.fontType}`}
@@ -50,6 +85,7 @@ export function App() {
       </header>
 
       <form
+        onSubmit={handleSubmit}
         className={`flex-1 flex flex-col justify-center items-center ${standardSettings.gap} ${standardSettings.p}`}
       >
         <p className="text-lg font-bold">Complete suas informações</p>
@@ -62,6 +98,8 @@ export function App() {
             <Input
               type="text"
               placeholder="Guilherme"
+              value={nome}
+              onChange={(event) => setNome(event.target.value)}
               className={`w-full ${standardSettings.inputStyle} ${standardSettings.focus}`}
             />
           </div>
@@ -71,6 +109,8 @@ export function App() {
             <Input
               type="text"
               placeholder="Soares"
+              value={sobrenome}
+              onChange={(event) => setSobrenome(event.target.value)}
               className={`w-full ${standardSettings.inputStyle} ${standardSettings.focus}`}
             />
           </div>
@@ -80,6 +120,8 @@ export function App() {
             <Input
               type="email"
               placeholder="Example@gmail.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               className={`w-full ${standardSettings.inputStyle} ${standardSettings.focus}`}
             />
           </div>
@@ -93,10 +135,16 @@ export function App() {
           </h2>
 
           <div className="flex flex-col">
-            {areas.map((area) => (
-              <label key={area.value}>
-                <input type="radio" name="area" value={area.value} />{" "}
-                {area.label}
+            {areas.map((item) => (
+              <label key={item.value}>
+                <input
+                  type="radio"
+                  name="area"
+                  value={item.value}
+                  checked={area === item.value}
+                  onChange={(event) => setArea(event.target.value)}
+                />{" "}
+                {item.label}
               </label>
             ))}
           </div>
@@ -110,6 +158,8 @@ export function App() {
           <select
             className={`${standardSettings.selectStyle} ${standardSettings.focus}`}
             name="senioridade"
+            value={senioridade}
+            onChange={(event) => setSenioridade(event.target.value)}
           >
             <option value="junior">Júnior</option>
             <option value="pleno">Pleno</option>
@@ -127,7 +177,13 @@ export function App() {
           <div className="w-full grid grid-cols-2 md:grid-cols-3">
             {technologies.map((technology) => (
               <label key={technology}>
-                <input type="checkbox" /> {technology}
+                <input
+                  type="checkbox"
+                  value={technology}
+                  checked={selectedTechnologies.includes(technology)}
+                  onChange={() => handleTechnologyChange(technology)}
+                />{" "}
+                {technology}
               </label>
             ))}
           </div>
@@ -141,6 +197,8 @@ export function App() {
           </h2>
 
           <textarea
+            value={experiencia}
+            onChange={(event) => setExperiencia(event.target.value)}
             className={`min-h-50 border rounded outline-none resize-none ${standardSettings.p} ${standardSettings.focus}`}
           />
         </section>
